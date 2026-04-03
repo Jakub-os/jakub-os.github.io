@@ -1,0 +1,7 @@
+{
+  "name": "website-clone",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  }
+}
