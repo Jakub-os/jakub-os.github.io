@@ -1,3 +1,5 @@
+const GOOGLE_SCRIPT_URL = "PASTE_DEPLOYED_APPS_SCRIPT_URL_HERE";
+
 document.addEventListener("DOMContentLoaded", () => {
   attachNewsletterFormHandler();
   attachContactFormHandler();
@@ -28,10 +30,11 @@ function attachNewsletterFormHandler() {
     }
 
     try {
-      const response = await fetch("/api/newsletter", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
+      const response = await postFormPayload({
+        form: "newsletter",
+        email,
+        form_source: "newsletter",
+        pageUrl: window.location.href
       });
 
       if (!response.ok) {
@@ -73,8 +76,8 @@ function attachContactFormHandler() {
     const name = (nameInput ? nameInput.value : "").trim();
     const email = (emailInput ? emailInput.value : "").trim();
     const message = (messageInput ? messageInput.value : "").trim();
-    const consentPrivacy = Boolean(privacyCheckbox && privacyCheckbox.checked);
-    const consentMarketing = Boolean(marketingCheckbox && marketingCheckbox.checked);
+    const consent_privacy = Boolean(privacyCheckbox && privacyCheckbox.checked);
+    const consent_marketing = Boolean(marketingCheckbox && marketingCheckbox.checked);
 
     clearMessage(errorDiv);
 
@@ -93,22 +96,21 @@ function attachContactFormHandler() {
       return;
     }
 
-    if (!consentPrivacy) {
+    if (!consent_privacy) {
       showError(errorDiv, "You must accept the privacy consent.");
       return;
     }
 
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          message,
-          consentPrivacy,
-          consentMarketing
-        })
+      const response = await postFormPayload({
+        form: "contact",
+        name,
+        email,
+        message,
+        consent_privacy,
+        consent_marketing,
+        form_source: "contact",
+        pageUrl: window.location.href
       });
 
       if (!response.ok) {
@@ -127,12 +129,31 @@ function attachContactFormHandler() {
   });
 }
 
+function postFormPayload(payload) {
+  if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === "PASTE_DEPLOYED_APPS_SCRIPT_URL_HERE") {
+    return Promise.reject(new Error("Google Apps Script URL is not configured."));
+  }
+
+  return fetch(GOOGLE_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+}
+
 function showError(errorElement, message) {
   if (!errorElement) {
     return;
   }
 
-  errorElement.textContent = message;
+  const messageNode = errorElement.querySelector("div");
+
+  if (messageNode) {
+    messageNode.textContent = message;
+  } else {
+    errorElement.textContent = message;
+  }
+
   errorElement.style.display = "block";
 }
 

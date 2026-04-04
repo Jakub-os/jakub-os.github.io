@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function () {
   disableInactiveLanguageSwitchers();
   normalizeEmbeddedBrandLinks();
   improveFormAccessibility();
-  initializeBrevoForms();
+  initializeFormEnhancements();
   addCardAriaLabels();
 
   document.querySelectorAll(".nav_container").forEach(function (nav, index) {
@@ -352,105 +352,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  function initializeBrevoForms() {
-    document.querySelectorAll(".newsletter_form").forEach(function (form) {
-      bindSecureFormSubmission(form, {
-        endpoint: "/api/newsletter",
-        buildPayload: function () {
-          return {
-            email: getTrimmedValue(form.querySelector("input[name='email']"))
-          };
-        }
-      });
-    });
-
-    document.querySelectorAll(".form_wrap").forEach(function (form) {
-      bindSecureFormSubmission(form, {
-        endpoint: "/api/contact",
-        buildPayload: function () {
-          return {
-            name: getTrimmedValue(form.querySelector("input[name='name']")),
-            email: getTrimmedValue(form.querySelector("input[name='email']")),
-            message: getTrimmedValue(form.querySelector("textarea[name='field']")),
-            consentPrivacy: isChecked(form.querySelector("#consent-contact-response")),
-            consentMarketing: isChecked(form.querySelector("#consent-contact-newsletter"))
-          };
-        }
-      });
-    });
-  }
-
-  function bindSecureFormSubmission(form, config) {
-    if (!form || form.dataset.brevoBound === "true") {
-      return;
-    }
-
-    form.dataset.brevoBound = "true";
-
-    form.addEventListener("submit", function (event) {
-      var ui;
-      var payload;
-
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      if (form.dataset.isSubmitting === "true") {
-        return;
-      }
-
-      ui = getFormUi(form);
-      payload = config.buildPayload();
-
-      form.dataset.isSubmitting = "true";
-      hideFormError(ui);
-      setSubmitButtonState(ui, true);
-
-      submitFormRequest(config.endpoint, payload)
-        .then(function (result) {
-          if (!result.ok) {
-            throw new Error(result.error || "Form submission failed.");
-          }
-
-          showFormSuccess(ui);
-          form.reset();
-        })
-        .catch(function () {
-          showFormError(ui);
-          setSubmitButtonState(ui, false);
-          form.dataset.isSubmitting = "false";
-        });
-    }, true);
-  }
-
-  function getTrimmedValue(input) {
-    return input && typeof input.value === "string" ? input.value.trim() : "";
-  }
-
-  function isChecked(input) {
-    return !!(input && input.checked);
-  }
-
-  function submitFormRequest(endpoint, payload) {
-    return fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    })
-      .then(function (response) {
-        return response.json()
-          .catch(function () {
-            return {};
-          })
-          .then(function (data) {
-            return {
-              ok: response.ok && data.ok !== false,
-              error: data && data.error ? data.error : null
-            };
-          });
-      });
+  function initializeFormEnhancements() {
+    // Form submission is handled in js/form-handler.js.
   }
 
   function getFormUi(form) {
