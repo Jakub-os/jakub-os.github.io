@@ -3,7 +3,6 @@ const https = require("node:https");
 const fs = require("node:fs");
 const fsp = require("node:fs/promises");
 const path = require("node:path");
-const crypto = require("node:crypto");
 
 const ROOT_DIR = __dirname;
 loadLocalEnvFile(path.join(ROOT_DIR, ".env"));
@@ -12,7 +11,6 @@ const PORT = Number(process.env.PORT) || 3000;
 const BREVO_API_KEY = process.env.BREVO_API_KEY || "";
 const BREVO_CONTACTS_URL = "https://api.brevo.com/v3/contacts";
 const MAX_BODY_SIZE = 32 * 1024;
-const DUPLICATE_WINDOW_MS = 15 * 1000;
 
 const MIME_TYPES = {
   ".css": "text/css; charset=utf-8",
@@ -28,8 +26,6 @@ const MIME_TYPES = {
   ".webp": "image/webp",
   ".xml": "application/xml; charset=utf-8"
 };
-
-const recentSubmissions = new Map();
 
 if (!BREVO_API_KEY) {
   console.warn("BREVO_API_KEY is not set. Form submissions will fail until the environment variable is provided.");
@@ -64,9 +60,6 @@ server.listen(PORT, () => {
 });
 
 async function handleApiRequest(req, res, formType) {
-  let requestBody;
-  let payload;
-
   if (req.method !== "POST") {
     sendJson(res, 405, {
       ok: false,
@@ -83,6 +76,8 @@ async function handleApiRequest(req, res, formType) {
     return;
   }
 
+  let requestBody;
+
   try {
     requestBody = await readJsonBody(req);
   } catch (error) {
@@ -93,7 +88,9 @@ async function handleApiRequest(req, res, formType) {
     return;
   }
 
-  payload = formType === "newsletter" ? validateNewsletterPayload(requestBody) : validateContactPayload(requestBody);
+  const payload = formType === "newsletter"
+    ? validateNewsletterPayload(requestBody)
+    : validateContactPayload(requestBody);
 
   if (!payload.ok) {
     sendJson(res, payload.statusCode, {
@@ -103,28 +100,13 @@ async function handleApiRequest(req, res, formType) {
     return;
   }
 
-  const submissionKey = createSubmissionKey(formType, payload.value);
-  const duplicateState = getDuplicateState(submissionKey);
-
-  if (duplicateState) {
-    sendJson(res, 202, {
-      ok: true,
-      duplicate: true
-    });
-    return;
-  }
-
-  rememberSubmission(submissionKey, "pending");
-
   try {
     await upsertBrevoContact(payload.value);
-    rememberSubmission(submissionKey, "completed");
 
     sendJson(res, 200, {
       ok: true
     });
   } catch (error) {
-    recentSubmissions.delete(submissionKey);
     console.error(`Brevo ${formType} submission failed:`, error.message);
 
     sendJson(res, 502, {
@@ -148,7 +130,7 @@ function validateNewsletterPayload(body) {
   return {
     ok: true,
     value: {
-      email: email,
+      email,
       listId: 5,
       attributes: {
         FORM_SOURCE: "newsletter"
@@ -199,12 +181,12 @@ function validateContactPayload(body) {
   return {
     ok: true,
     value: {
-      email: email,
+      email,
       listId: 6,
       attributes: {
         FIRSTNAME: name,
         MESSAGE: message,
-        CONTACT_CONSENT: true,
+        CONTACT_CONSENT: consentPrivacy,
         MARKETING_CONSENT: consentMarketing,
         FORM_SOURCE: "contact"
       }
@@ -223,7 +205,7 @@ async function upsertBrevoContact(payload) {
   const response = await makeHttpsJsonRequest(BREVO_CONTACTS_URL, {
     method: "POST",
     headers: {
-      "Accept": "application/json",
+      Accept: "application/json",
       "Api-Key": BREVO_API_KEY,
       "Content-Type": "application/json",
       "Content-Length": Buffer.byteLength(requestBody)
@@ -301,8 +283,9 @@ async function readJsonBody(req) {
 
 async function serveStaticFile(requestPath, res) {
   const normalizedPath = requestPath === "/" ? "/index.html" : decodeURIComponent(requestPath);
-  const safePath = path.normalize(normalizedPath).replace(/^(\.\.(\/|\\|$))+/, "");
-  let filePath = path.join(ROOT_DIR, safePath);
+  const safePath = path.normalize(normalizedPath).replace(/^([.][.][/\\])+/, "");
+  const relativePath = safePath.replace(/^[/\\]+/, "");
+  let filePath = path.join(ROOT_DIR, relativePath);
 
   if (!filePath.startsWith(ROOT_DIR)) {
     sendPlainText(res, 403, "Forbidden");
@@ -330,27 +313,7 @@ async function serveStaticFile(requestPath, res) {
   }
 
   const extension = path.extname(filePath).toLowerCase();
-  const contentType = MIME_TYPES[extension] | || "application/octet-stream";
-      // Inject form-handler script into HTML files
-  if (extension === ".html") {
-    try 
-      const data = await fsp.readFile(filePath, "utf8");
-      const scriptTag = '<script src="/js/form-handler.js"></script>';
-      let modified = data;
-      if (!data.includes(scriptTag)) {
-        modified = data.replace('</body>', `${scriptTag}</body>`);
-      }
-      res.writeHead(200, {
-        "Content-Type": contentType,
-        "Content-Length": Buffer.byteLength(modified)
-      });
-      res.end(modified);
-      return;
-    } catch (err) {
-      console.error("Error injecting form handler", err);
-    }
-  }
-
+  const contentType = MIME_TYPES[extension] || "application/octet-stream";
 
   res.writeHead(200, {
     "Content-Type": contentType,
@@ -390,41 +353,6 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function createSubmissionKey(formType, payload) {
-  return crypto
-    .createHash("sha256")
-    .update(JSON.stringify([formType, payload]))
-    .digest("hex");
-}
-
-function getDuplicateState(key) {
-  cleanupOldSubmissions();
-
-  if (!recentSubmissions.has(key)) {
-    return null;
-  }
-
-  return recentSubmissions.get(key).state;
-}
-
-function rememberSubmission(key, state) {
-  cleanupOldSubmissions();
-  recentSubmissions.set(key, {
-    state: state,
-    timestamp: Date.now()
-  });
-}
-
-function cleanupOldSubmissions() {
-  const now = Date.now();
-
-  recentSubmissions.forEach((entry, key) => {
-    if (now - entry.timestamp > DUPLICATE_WINDOW_MS) {
-      recentSubmissions.delete(key);
-    }
-  });
-}
-
 function loadLocalEnvFile(envFilePath) {
   let contents;
 
@@ -436,22 +364,19 @@ function loadLocalEnvFile(envFilePath) {
 
   contents.split(/\r?\n/).forEach((line) => {
     const trimmedLine = line.trim();
-    let separatorIndex;
-    let key;
-    let value;
 
     if (!trimmedLine || trimmedLine.startsWith("#")) {
       return;
     }
 
-    separatorIndex = trimmedLine.indexOf("=");
+    const separatorIndex = trimmedLine.indexOf("=");
 
     if (separatorIndex === -1) {
       return;
     }
 
-    key = trimmedLine.slice(0, separatorIndex).trim();
-    value = trimmedLine.slice(separatorIndex + 1).trim();
+    const key = trimmedLine.slice(0, separatorIndex).trim();
+    let value = trimmedLine.slice(separatorIndex + 1).trim();
 
     if (!key || process.env[key] !== undefined) {
       return;
