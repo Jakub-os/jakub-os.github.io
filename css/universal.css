@@ -1386,7 +1386,7 @@ body.mobile-nav-open {
   }
 
   .homepage-hero__title {
-    font-size: clamp(2.5rem, 10vw, 3.75rem);
+    font-size: clamp(2.9rem, 11.5vw, 4.25rem);
     letter-spacing: -0.05em;
   }
 
@@ -1402,14 +1402,14 @@ body.mobile-nav-open {
   }
 
   .homepage-hero__decoration--pink-postit {
-    top: 13.125rem;
-    left: -1.5rem;
+    top: 14.25rem;
+    left: -3rem;
     width: 8.625rem;
   }
 
   .homepage-hero__decoration--yellow-postit {
-    top: 15.625rem;
-    right: -1.875rem;
+    top: 16rem;
+    right: -3.25rem;
     width: 8.625rem;
   }
 
