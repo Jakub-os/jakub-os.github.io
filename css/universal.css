@@ -1595,7 +1595,7 @@ html[data-wf-collection="69ba91bd06ecfcb282e9a151"] .container.newsletter .h3 {
 .yabi-nav-shell {
   display: inline-flex;
   justify-content: center;
-  width: fit-content;
+  width: 100%;
   max-width: 100%;
   margin: 0 auto;
   padding: 0;
@@ -1609,7 +1609,7 @@ html[data-wf-collection="69ba91bd06ecfcb282e9a151"] .container.newsletter .h3 {
 }
 
 .nav_container.yabi-nav-shell {
-  width: fit-content;
+  width: 100%;
   max-width: 100%;
   margin: 0 auto;
   padding: 0;
@@ -1639,7 +1639,7 @@ nav.nav_section > nav.w-layout-blockcontainer.nav_container.w-container.yabi-nav
 nav.nav_section > .nav_container,
 .nav_container.yabi-nav-shell {
   display: inline-flex !important;
-  width: fit-content !important;
+  width: 100% !important;
   max-width: 100% !important;
   margin: 0 auto !important;
 }
