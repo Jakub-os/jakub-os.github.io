@@ -141,7 +141,7 @@
 
       nav.classList.add("yabi-nav-shell");
       nav.style.display = "inline-flex";
-      nav.style.width = "fit-content";
+      nav.style.width = "100%";
       nav.style.maxWidth = "100%";
       nav.style.margin = "0 auto";
       nav.style.padding = "0";
