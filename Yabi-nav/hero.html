@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="sk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Standalone hero preview implemented from the YABI Studio Figma design."
+    />
+    <title>YABI Hero Preview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="hero.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body class="hero-page">
+    <main class="hero-scene">
+      <img class="hero-grid" src="images/grid.svg" alt="" aria-hidden="true" />
+
+      <img
+        class="hero-decoration hero-decoration--clip"
+        src="images/clip.png"
+        alt=""
+        aria-hidden="true"
+      />
+      <img
+        class="hero-decoration hero-decoration--paperclip"
+        src="images/paperclip.png"
+        alt=""
+        aria-hidden="true"
+      />
+      <img
+        class="hero-decoration hero-decoration--pink-postit"
+        src="images/Pinkpostit.png"
+        alt=""
+        aria-hidden="true"
+      />
+      <img
+        class="hero-decoration hero-decoration--yellow-postit"
+        src="images/Yellowpostit.png"
+        alt=""
+        aria-hidden="true"
+      />
+      <img
+        class="hero-decoration hero-decoration--pen"
+        src="images/pen.png"
+        alt=""
+        aria-hidden="true"
+      />
+      <img
+        class="hero-decoration hero-decoration--ruler"
+        src="images/ruler.png"
+        alt=""
+        aria-hidden="true"
+      />
+
+      <header class="site-header hero-nav-shell">
+        <div class="nav-card" id="siteNav">
+          <div class="nav-bar">
+            <a class="logo-wrap" href="index.html" aria-label="YABI home">
+              <svg
+                class="brand-mark"
+                viewBox="0 0 46 44"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  d="M0 13.6353V3.27308C0 2.75205 0.3546 2.29864 0.8591 2.17392L9.6439 0.00355503C9.7183 -0.015095 9.7904 0.042025 9.7904 0.118955V6.8888L0 13.6353Z"
+                  transform="translate(23.658 1.954)"
+                />
+                <path
+                  d="M12.4981 0.230293L6.249 4.53605L0 8.8418V3.0872L12.397 0.00416487C12.533 -0.0296378 12.6144 0.151031 12.4981 0.231458V0.230293Z"
+                  transform="translate(33.446 0)"
+                />
+                <path
+                  d="M33.446 14.7439V0.12484C33.446 0.0245996 33.3332 -0.0348505 33.2507 0.0222595L0.0544279 22.8973C-0.0595088 22.9765 0.0207119 23.1549 0.154413 23.1211L33.3507 14.8639C33.4065 14.8499 33.4448 14.7998 33.4448 14.7427L33.446 14.7439Z"
+                  transform="translate(0 8.954)"
+                />
+                <path
+                  d="M29.1341 0L0.183704 20.01C0.0918539 20.0729 -0.0278959 19.9843 0.00582414 19.8782L4.32495 6.1707L29.1341 0Z"
+                  transform="translate(4.315 23.795)"
+                />
+                <path
+                  d="M0 6.0017L3.4251 16.8593L8.6824 0L0 6.0017Z"
+                  transform="translate(19.927 27.139)"
+                />
+                <path
+                  d="M9.723 4.8408L1.5788 0L0 5.0634H4.8313H9.6625C9.7834 5.0634 9.8276 4.9025 9.723 4.8408Z"
+                  transform="translate(23.35 38.936)"
+                />
+                <path
+                  class="brand-mark__dot"
+                  d="M1.3219 2.65059C2.052 2.65059 2.6438 2.05723 2.6438 1.32529C2.6438 0.59335 2.052 0 1.3219 0C0.591899 0 0 0.59335 0 1.32529C0 2.05723 0.591899 2.65059 1.3219 2.65059Z"
+                  transform="translate(27.076 6.266)"
+                />
+              </svg>
+            </a>
+
+            <button
+              class="nav-toggle"
+              id="openMenu"
+              type="button"
+              aria-controls="menuPanel"
+              aria-expanded="false"
+              aria-label="Open menu"
+            >
+              <svg
+                class="menu-icon"
+                viewBox="0 0 26 26"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path d="M26 5V7H0V5H26Z" />
+                <path d="M26 12V14H0V12H26Z" />
+                <path d="M26 19V21H0V19H26Z" />
+              </svg>
+              <svg
+                class="close-icon"
+                viewBox="0 0 26 26"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  d="M22.8995 21.4853L21.4853 22.8995L3.10051 4.51472L4.51472 3.10051L22.8995 21.4853Z"
+                />
+                <path
+                  d="M21.4853 3.10051L22.8995 4.51472L4.51472 22.8995L3.10051 21.4853L21.4853 3.10051Z"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <section class="menu-panel" id="menuPanel" aria-label="Site navigation">
+            <div class="menu-layout">
+              <div class="menu-main">
+                <nav class="menu-links" aria-label="Primary">
+                  <a href="#" data-close-menu>O N&Aacute;S</a>
+                  <a href="#" data-close-menu>PROJEKTY</a>
+                  <a href="#" data-close-menu>SLU&#381;BY</a>
+                  <a href="#" data-close-menu>BLOG</a>
+
+                  <div class="lang-switch" aria-label="Language switcher">
+                    <a href="#" data-close-menu lang="sk">SK</a>
+                    <span aria-hidden="true">/</span>
+                    <a href="#" data-close-menu lang="en">EN</a>
+                  </div>
+                </nav>
+
+                <a class="menu-visual" href="#" data-close-menu>
+                  <img src="images/Image Container.png" alt="" />
+                  <span class="menu-visual__link">KONTAKT</span>
+                </a>
+              </div>
+
+              <footer class="menu-footer">
+                <p>YABI Studio</p>
+                <p>2026</p>
+              </footer>
+            </div>
+          </section>
+        </div>
+      </header>
+
+      <section class="hero-content" aria-labelledby="hero-title">
+        <p class="hero-chip">
+          <span class="hero-chip__dot" aria-hidden="true"></span>
+          YABI STUDIO
+        </p>
+
+        <h1 class="hero-title" id="hero-title">
+          <span class="hero-title__line">Staviame weby,</span>
+          <span class="hero-title__line">
+            ktor&eacute;
+            <span class="hero-bounds hero-bounds--cyan">pracuj&uacute;</span>
+          </span>
+          <span class="hero-title__line">
+            pre
+            <span class="hero-bounds hero-bounds--magenta">v&aacute;s!</span>
+          </span>
+        </h1>
+
+        <div class="hero-copy">
+          <p class="hero-description">
+            Tvor&iacute;me weby, ktor&eacute; sp&aacute;jaj&uacute; estetiku, strat&eacute;giu a
+            &scaron;pi&#269;kov&yacute; UX dizajn. Od n&aacute;vrhu a&#382; po
+            realiz&aacute;ciu dod&aacute;vame rie&scaron;enia, ktor&eacute;
+            prin&aacute;&scaron;aj&uacute; v&yacute;sledky.
+          </p>
+
+          <a class="hero-cta" href="#">KONTAKTUJTE N&Aacute;S</a>
+        </div>
+      </section>
+    </main>
+
+    <section class="hero-scroll-spacer" aria-hidden="true">
+      <div class="hero-scroll-spacer__inner">
+        <p>Scroll down to test the navbar hide and reveal animation.</p>
+      </div>
+    </section>
+  </body>
+</html>
